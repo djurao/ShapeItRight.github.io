@@ -103,7 +103,7 @@
         }
 
         document.querySelector("#unity-loading-bar").style.display = "block";
-
+        var unityInstance = null; // Declare globally
         var script = document.createElement("script");
         script.src = loaderUrl;
         script.onload = () => {
