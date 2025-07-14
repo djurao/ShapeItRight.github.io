@@ -25,9 +25,8 @@
             </thead>
             <tbody id="levelsTable"></tbody>
         </table>
-        <button type="button" onclick="exportJSON()">Export JSON</button>
+        <button type="button" onclick="downloadJSON()">Save</button>
     </form>
-    <textarea id="output" rows="20" cols="80" readonly placeholder="JSON output here"></textarea>
     <script>
         const levelCount = 50;
         const tbody = document.getElementById('levelsTable');
@@ -43,7 +42,7 @@
             tbody.appendChild(row);
         }
 
-        function exportJSON() {
+        function downloadJSON() {
             const form = document.getElementById('timesForm');
             const data = [];
             for (let i = 0; i < levelCount; i++) {
@@ -63,7 +62,16 @@
                     }
                 });
             }
-            document.getElementById('output').value = JSON.stringify(data, null, 2);
+            const jsonText = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonText], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "levels.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
