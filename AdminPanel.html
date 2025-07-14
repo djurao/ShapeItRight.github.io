@@ -14,6 +14,7 @@
 <body>
     <h2>Set Times for 50 Levels (Indexes 0-49)</h2>
     <form id="timesForm">
+        <button type="button" onclick="downloadJSON()">Save</button>
         <table>
             <thead>
                 <tr>
@@ -25,12 +26,12 @@
             </thead>
             <tbody id="levelsTable"></tbody>
         </table>
-        <button type="button" onclick="downloadJSON()">Save</button>
     </form>
     <script>
         const levelCount = 50;
         const tbody = document.getElementById('levelsTable');
 
+        // Render input rows
         for (let i = 0; i < levelCount; i++) {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -63,6 +64,7 @@
                 });
             }
             const jsonText = JSON.stringify(data, null, 2);
+            console.log(jsonText); // Print JSON to console
             const blob = new Blob([jsonText], {type: "application/json"});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -73,6 +75,28 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
+
+        // Auto-load levels.json and populate the form
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('levels.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('levels.json not found');
+                    return response.json();
+                })
+                .then(arr => {
+                    if (!Array.isArray(arr)) throw new Error("Invalid levels.json format.");
+                    for (let i = 0; i < levelCount; i++) {
+                        if (!arr[i] || !arr[i].times) continue;
+                        document.forms.timesForm[`level${i}_3`].value = arr[i].times["3star"] ?? '';
+                        document.forms.timesForm[`level${i}_2`].value = arr[i].times["2star"] ?? '';
+                        document.forms.timesForm[`level${i}_1`].value = arr[i].times["1star"] ?? '';
+                    }
+                })
+                .catch(err => {
+                    // Remove the alert if you don't want to show a message when no file exists yet
+                    // alert('Auto-load: ' + err.message);
+                });
+        });
     </script>
 </body>
 </html>
