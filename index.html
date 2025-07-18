@@ -124,52 +124,45 @@
 
     </script>
     <script>
-        const trustedOrigins = [
-            "https://preview--childwise-platform.netlify.app",
-            "http://localhost:3000",
-            "https://childwiselabs.com",
-            "https://games.childwiselabs.com",
-            "http://localhost:62274/",
-        ];
+      function onMsg(event) {
+        try {
+          let data =
+            typeof event.data === "string"
+              ? JSON.parse(event.data)
+              : event.data;
+          console.log("📩 Received message:", data);
 
-        let lastTrustedOrigin = null;
-
-        function onMsg(event) {
-            try {
-                let data =
-                    typeof event.data === "string"
-                        ? JSON.parse(event.data)
-                        : event.data;
-                console.log("📩 Received message:", data);
-
-                if (data.type === "LoadSave") {
-                    sendToUnity("ReceiveSaveData", data.payload);
-                }
-            } catch (error) {
-                console.error("❌ Error processing message:", error);
-            }
+          if (data.type === "LoadSave") {
+            sendToUnity("ReceiveSaveData", data.payload);
+          }
+        } catch (error) {
+          console.error("❌ Error processing message:", error);
         }
+      }
 
-        window.addEventListener("message", onMsg, false);
+      window.addEventListener("message", onMsg, false);
 
-        function sendToUnity(method, data) {
-            if (window.unityInstance) {
-                console.log(`✅ Sending '${method}' to Unity with data:`, data);
-                window.unityInstance.SendMessage("WebGLBridge", method, data);
-            } else {
-                console.warn("⚠️ Unity instance not ready. Retrying...");
-                setTimeout(() => sendToUnity(method, data), 2000);
-            }
+      // Expose the function to send data to Unity
+      function sendToUnity(method, data) {
+        if (window.unityInstance) {
+          console.log(`✅ Sending '${method}' to Unity with data:`, data);
+          window.unityInstance.SendMessage("WebGLBridge", method, data);
+        } else {
+          console.warn("⚠️ Unity instance not ready. Retrying...");
+          setTimeout(() => sendToUnity(method, data), 5000);
         }
+      }
+      // Expose the function to get data from Unity
+      window.SendToWeb = function (payload) {
+        console.log("📤 Received data from Unity:", payload);
 
-        window.SendToWeb = function (payload) {
-            console.log(":outbox_tray: Received data from Unity:", payload);
-            parent.postMessage(
-                JSON.stringify({ message: payload }),
-                "https://childwiselabs.com"
-            );
-            return JSON.stringify({ success: true, received: payload });
-        };
+        parent.postMessage(
+          JSON.stringify({ message: payload }),
+          "https://childwiselabs.com"
+        );
+
+        return JSON.stringify({ success: true, received: payload });
+      };
     </script>
 </body>
 </html>
