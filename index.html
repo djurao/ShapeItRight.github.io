@@ -124,48 +124,54 @@
 
     </script>
 	<script>
-        function onMsg(event) {
-            try {
-                let data = event.data;
+       function onMsg(event) {
+  try {
+    let data = event.data;
 
-                // If data is a string, attempt to parse it
-                if (typeof data === "string") {
-                    try {
-                        data = JSON.parse(data);
-                    } catch (e) {
-                        // If parsing fails, keep as string
-                        console.warn("Failed to parse string data:", data);
-                    }
-                }
+    // Helper function to safely parse JSON
+    function tryParseJSON(jsonString) {
+      try {
+        return JSON.parse(jsonString);
+      } catch (e) {
+        return null; // Return null if parsing fails
+      }
+    }
 
-                console.log("📩 Received message:", data);
+    // If data is a string, parse it
+    if (typeof data === "string") {
+      const parsed = tryParseJSON(data);
+      if (parsed !== null) {
+        data = parsed;
+      }
+    }
 
-                // If the data contains a JSON string inside a property, parse it again
-                if (typeof data === "object" && data.received && typeof data.received === "string") {
-                    try {
-                        data.received = JSON.parse(data.received);
-                        console.log("Nested JSON parsed:", data.received);
-                    } catch (err) {
-                        console.warn("Failed to parse nested received data:", data.received);
-                    }
-                }
+    console.log("📩 Received message:", data);
 
-                // Handle specific message types
-                if (data.type === "LoadSave") {
-                    // Assuming data.payload might also be a JSON string
-                    if (typeof data.payload === "string") {
-                        try {
-                            data.payload = JSON.parse(data.payload);
-                        } catch (err) {
-                            console.warn("Failed to parse payload JSON:", data.payload);
-                        }
-                    }
-                    sendToUnity("ReceiveSaveData", data.payload);
-                }
-            } catch (error) {
-                console.error("❌ Error processing message:", error);
-            }
+    // Check for nested JSON inside data.received
+    if (data && data.received && typeof data.received === "string") {
+      const nested = tryParseJSON(data.received);
+      if (nested !== null) {
+        data.received = nested;
+        console.log("Nested JSON parsed:", data.received);
+      }
+    }
+
+    // Handle specific message types
+    if (data && data.type === "LoadSave") {
+      // Parse payload if string
+      if (typeof data.payload === "string") {
+        const payloadParsed = tryParseJSON(data.payload);
+        if (payloadParsed !== null) {
+          data.payload = payloadParsed;
+          console.log("Parsed payload:", data.payload);
         }
+      }
+      sendToUnity("ReceiveSaveData", data.payload);
+    }
+  } catch (error) {
+    console.error("❌ Error processing message:", error);
+  }
+}
 
 
       window.addEventListener("message", onMsg, false);
