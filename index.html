@@ -179,11 +179,11 @@
             console.log("📤 Received data from Unity:", payload);
 
             parent.postMessage(
-                JSON.stringify({ message: payload }),
+                { message: payload },
                 "https://childwiselabs.com"
             );
 
-            return JSON.stringify({ success: true, received: payload });
+            return payload;
         };
     </script>
 </body>
