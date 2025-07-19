@@ -1,202 +1,190 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | ShapeItRightBuildItFast</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-  </head>
-  <body>
+</head>
+<body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
+        <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+        <div id="unity-loading-bar">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty">
+                <div id="unity-progress-bar-full"></div>
+            </div>
         </div>
-      </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">ShapeItRightBuildItFast</div>
-      </div>
+        <div id="unity-warning"> </div>
+        <div id="unity-footer">
+            <div id="unity-logo-title-footer"></div>
+            <div id="unity-fullscreen-button"></div>
+            <div id="unity-build-title">ShapeItRightBuildItFast</div>
+        </div>
     </div>
     <script>
-      var canvas = document.querySelector("#unity-canvas");
+        var canvas = document.querySelector("#unity-canvas");
 
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
+        // Shows a temporary message banner/ribbon for a few seconds, or
+        // a permanent error message on top of the canvas if type=='error'.
+        // If type=='warning', a yellow highlight color is used.
+        // Modify or remove this function to customize the visually presented
+        // way that non-critical warnings and error messages are presented to the
+        // user.
+        function unityShowBanner(msg, type) {
+            var warningBanner = document.querySelector("#unity-warning");
+            function updateBannerVisibility() {
+                warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+            }
+            var div = document.createElement('div');
+            div.innerHTML = msg;
+            warningBanner.appendChild(div);
+            if (type == 'error') div.style = 'background: red; padding: 10px;';
+            else {
+                if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+                setTimeout(function () {
+                    warningBanner.removeChild(div);
+                    updateBannerVisibility();
+                }, 5000);
+            }
             updateBannerVisibility();
-          }, 5000);
         }
-        updateBannerVisibility();
-      }
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/ShapeItRightBuild.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/ShapeItRightBuild.data",
-        frameworkUrl: buildUrl + "/ShapeItRightBuild.framework.js",
-        codeUrl: buildUrl + "/ShapeItRightBuild.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "ShapeItRightBuildItFast",
-        productVersion: "0.1.0",
-        showBanner: unityShowBanner,
-      };
+        var buildUrl = "Build";
+        var loaderUrl = buildUrl + "/ShapeItRightBuild.loader.js";
+        var config = {
+            arguments: [],
+            dataUrl: buildUrl + "/ShapeItRightBuild.data",
+            frameworkUrl: buildUrl + "/ShapeItRightBuild.framework.js",
+            codeUrl: buildUrl + "/ShapeItRightBuild.wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "DefaultCompany",
+            productName: "ShapeItRightBuildItFast",
+            productVersion: "0.1.0",
+            showBanner: unityShowBanner,
+        };
 
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
+        // By default, Unity keeps WebGL canvas render target size matched with
+        // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+        // Set this to false if you want to decouple this synchronization from
+        // happening inside the engine, and you would instead like to size up
+        // the canvas DOM size and WebGL render target sizes yourself.
+        // config.matchWebGLToCanvasSize = false;
 
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
+        // If you would like all file writes inside Unity Application.persistentDataPath
+        // directory to automatically persist so that the contents are remembered when
+        // the user revisits the site the next time, uncomment the following line:
+        // config.autoSyncPersistentDataPath = true;
+        // This autosyncing is currently not the default behavior to avoid regressing
+        // existing user projects that might rely on the earlier manual
+        // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+        // expected to change.
 
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            // Mobile device style: fill the whole browser client area with the game canvas:
 
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
+            var meta = document.createElement('meta');
+            meta.name = 'viewport';
+            meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+            document.getElementsByTagName('head')[0].appendChild(meta);
+            document.querySelector("#unity-container").className = "unity-mobile";
+            canvas.className = "unity-mobile";
 
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
+            // To lower canvas resolution on mobile devices to gain some
+            // performance, uncomment the following line:
+            // config.devicePixelRatio = 1;
 
+        } else {
+            // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+            canvas.style.width = "960px";
+            canvas.style.height = "600px";
+        }
 
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
-      }
+        document.querySelector("#unity-loading-bar").style.display = "block";
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
-
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = () => {
+            createUnityInstance(canvas, config, (progress) => {
+                document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+            }).then((unityInstance) => {
                 document.querySelector("#unity-loading-bar").style.display = "none";
                 document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
+                    unityInstance.SetFullscreen(1);
                 };
-				window.unityInstance = unityInstance;
-              }).catch((message) => {
+                window.unityInstance = unityInstance;
+            }).catch((message) => {
                 alert(message);
-              });
-            };
+            });
+        };
 
-      document.body.appendChild(script);
+        document.body.appendChild(script);
 
     </script>
-	<script>
-       function onMsg(event) {
-  try {
-    let data = event.data;
-
-    // Helper function to safely parse JSON
-    function tryParseJSON(jsonString) {
-      try {
-        return JSON.parse(jsonString);
-      } catch (e) {
-        return null; // Return null if parsing fails
-      }
-    }
-
-    // If data is a string, parse it
-    if (typeof data === "string") {
-      const parsed = tryParseJSON(data);
-      if (parsed !== null) {
-        data = parsed;
-      }
-    }
-
-    console.log("📩 Received message:", data);
-
-    // Check for nested JSON inside data.received
-    if (data && data.received && typeof data.received === "string") {
-      const nested = tryParseJSON(data.received);
-      if (nested !== null) {
-        data.received = nested;
-        console.log("Nested JSON parsed:", data.received);
-      }
-    }
-
-    // Handle specific message types
-    if (data && data.type === "LoadSave") {
-      // Parse payload if string
-      if (typeof data.payload === "string") {
-        const payloadParsed = tryParseJSON(data.payload);
-        if (payloadParsed !== null) {
-          data.payload = payloadParsed;
-          console.log("Parsed payload:", data.payload);
+    <script>
+        // Deeply parses JSON strings until an object is returned or max tries reached
+        function deepParseJSON(data) {
+            let result = data;
+            let tries = 0;
+            while (typeof result === "string" && tries < 5) {
+                try {
+                    result = JSON.parse(result);
+                    tries++;
+                } catch {
+                    break;
+                }
+            }
+            return result;
         }
-      }
-      sendToUnity("ReceiveSaveData", data.payload);
-    }
-  } catch (error) {
-    console.error("❌ Error processing message:", error);
-  }
-}
 
+        function onMsg(event) {
+            try {
+                let data = deepParseJSON(event.data);
 
-      window.addEventListener("message", onMsg, false);
+                if (data && data.received) {
+                    data.received = deepParseJSON(data.received);
+                    console.log("Nested JSON parsed:", data.received);
+                }
 
-      // Expose the function to send data to Unity
-      function sendToUnity(method, data) {
-        if (window.unityInstance) {
-          console.log(`✅ Sending '${method}' to Unity with data:`, data);
-          window.unityInstance.SendMessage("WebGLBridge", method, data);
-        } else {
-          console.warn("⚠️ Unity instance not ready. Retrying...");
-          setTimeout(() => sendToUnity(method, data), 5000);
+                if (data && data.payload) {
+                    data.payload = deepParseJSON(data.payload);
+                    console.log("Parsed payload:", data.payload);
+                }
+
+                console.log("📩 Received message:", data);
+
+                if (data && data.type === "LoadSave") {
+                    sendToUnity("ReceiveSaveData", data.payload);
+                }
+            } catch (error) {
+                console.error("❌ Error processing message:", error);
+            }
         }
-      }
-      // Expose the function to get data from Unity
-      window.SendToWeb = function (payload) {
-        console.log("📤 Received data from Unity:", payload);
 
-        parent.postMessage(
-          JSON.stringify({ message: payload }),
-          "https://childwiselabs.com"
-        );
+        window.addEventListener("message", onMsg, false);
 
-        return JSON.stringify({ success: true, received: payload });
-      };
+        // Expose the function to send data to Unity
+        function sendToUnity(method, data) {
+            if (window.unityInstance) {
+                console.log(`✅ Sending '${method}' to Unity with data:`, data);
+                window.unityInstance.SendMessage("WebGLBridge", method, data);
+            } else {
+                console.warn("⚠️ Unity instance not ready. Retrying...");
+                setTimeout(() => sendToUnity(method, data), 5000);
+            }
+        }
+        // Expose the function to get data from Unity
+        window.SendToWeb = function (payload) {
+            console.log("📤 Received data from Unity:", payload);
+
+            parent.postMessage(
+                JSON.stringify({ message: payload }),
+                "https://childwiselabs.com"
+            );
+
+            return JSON.stringify({ success: true, received: payload });
+        };
     </script>
-  </body>
+</body>
 </html>
