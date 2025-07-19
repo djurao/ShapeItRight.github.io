@@ -124,21 +124,49 @@
 
     </script>
 	<script>
-      function onMsg(event) {
-        try {
-          let data =
-            typeof event.data === "string"
-              ? JSON.parse(event.data)
-              : event.data;
-          console.log("📩 Received message:", data);
+        function onMsg(event) {
+            try {
+                let data = event.data;
 
-          if (data.type === "LoadSave") {
-            sendToUnity("ReceiveSaveData", data.payload);
-          }
-        } catch (error) {
-          console.error("❌ Error processing message:", error);
+                // If data is a string, attempt to parse it
+                if (typeof data === "string") {
+                    try {
+                        data = JSON.parse(data);
+                    } catch (e) {
+                        // If parsing fails, keep as string
+                        console.warn("Failed to parse string data:", data);
+                    }
+                }
+
+                console.log("📩 Received message:", data);
+
+                // If the data contains a JSON string inside a property, parse it again
+                if (typeof data === "object" && data.received && typeof data.received === "string") {
+                    try {
+                        data.received = JSON.parse(data.received);
+                        console.log("Nested JSON parsed:", data.received);
+                    } catch (err) {
+                        console.warn("Failed to parse nested received data:", data.received);
+                    }
+                }
+
+                // Handle specific message types
+                if (data.type === "LoadSave") {
+                    // Assuming data.payload might also be a JSON string
+                    if (typeof data.payload === "string") {
+                        try {
+                            data.payload = JSON.parse(data.payload);
+                        } catch (err) {
+                            console.warn("Failed to parse payload JSON:", data.payload);
+                        }
+                    }
+                    sendToUnity("ReceiveSaveData", data.payload);
+                }
+            } catch (error) {
+                console.error("❌ Error processing message:", error);
+            }
         }
-      }
+
 
       window.addEventListener("message", onMsg, false);
 
