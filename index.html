@@ -52,12 +52,12 @@
         }
 
         var buildUrl = "Build";
-        var loaderUrl = buildUrl + "/ShapeItRightBuild.loader.js";
+        var loaderUrl = buildUrl + "/Builds.loader.js";
         var config = {
             arguments: [],
-            dataUrl: buildUrl + "/ShapeItRightBuild.data",
-            frameworkUrl: buildUrl + "/ShapeItRightBuild.framework.js",
-            codeUrl: buildUrl + "/ShapeItRightBuild.wasm",
+            dataUrl: buildUrl + "/Builds.data",
+            frameworkUrl: buildUrl + "/Builds.framework.js",
+            codeUrl: buildUrl + "/Builds.wasm",
             streamingAssetsUrl: "StreamingAssets",
             companyName: "DefaultCompany",
             productName: "ShapeItRightBuildItFast",
@@ -123,68 +123,58 @@
 
     </script>
     <script>
-        // Deeply parses JSON strings until an object is returned or max tries reached
-        function deepParseJSON(data) {
-            let result = data;
-            let tries = 0;
-            while (typeof result === "string" && tries < 5) {
-                try {
-                    result = JSON.parse(result);
-                    tries++;
-                } catch {
-                    break;
-                }
-            }
-            return result;
+    const trustedOrigins = [
+      "https://preview--childwise-platform.netlify.app",
+      "http://localhost:3000",
+      "https://childwiselabs.com",
+      "https://games.childwiselabs.com",
+    ];
+
+    let lastTrustedOrigin = null;
+
+    function onMsg(event) {
+      if (!trustedOrigins.includes(event.origin)) {
+        console.warn("Untrusted origin:", event.origin);
+        return;
+      }
+
+      lastTrustedOrigin = event.origin;
+
+      try {
+        let data =
+          typeof event.data === "string"
+            ? JSON.parse(event.data)
+            : event.data;
+        console.log("📩 Received message:", data);
+
+        if (data.type === "LoadSave") {
+          sendToUnity("ReceiveSaveData", data.payload);
         }
+      } catch (error) {
+        console.error("❌ Error processing message:", error);
+      }
+    }
 
-        function onMsg(event) {
-            try {
-                let data = deepParseJSON(event.data);
+    window.addEventListener("message", onMsg, false);
 
-                if (data && data.received) {
-                    data.received = deepParseJSON(data.received);
-                    console.log("Nested JSON parsed:", data.received);
-                }
+    function sendToUnity(method, data) {
+      if (window.unityInstance) {
+        console.log(`✅ Sending '${method}' to Unity with data:`, data);
+        window.unityInstance.SendMessage("WebGLBridge", method, data);
+      } else {
+        console.warn("⚠️ Unity instance not ready. Retrying...");
+        setTimeout(() => sendToUnity(method, data), 2000);
+      }
+    }
 
-                if (data && data.payload) {
-                    data.payload = deepParseJSON(data.payload);
-                    console.log("Parsed payload:", data.payload);
-                }
-
-                console.log("📩 Received message:", data);
-
-                if (data && data.type === "LoadSave") {
-                    sendToUnity("ReceiveSaveData", data.payload);
-                }
-            } catch (error) {
-                console.error("❌ Error processing message:", error);
-            }
-        }
-
-        window.addEventListener("message", onMsg, false);
-
-        // Expose the function to send data to Unity
-        function sendToUnity(method, data) {
-            if (window.unityInstance) {
-                console.log(`✅ Sending '${method}' to Unity with data:`, data);
-                window.unityInstance.SendMessage("WebGLBridge", method, data);
-            } else {
-                console.warn("⚠️ Unity instance not ready. Retrying...");
-                setTimeout(() => sendToUnity(method, data), 5000);
-            }
-        }
-        // Expose the function to get data from Unity
-        window.SendToWeb = function (payload) {
-            console.log("📤 Received data from Unity:", payload);
-
-            parent.postMessage(
-                { message: payload },
-                "https://childwiselabs.com"
-            );
-
-            return payload;
-        };
-    </script>
+    window.SendToWeb = function (payload) {
+      console.log(":outbox_tray: Received data from Unity:", payload);
+      parent.postMessage(
+        JSON.stringify({ message: payload }),
+        "https://childwiselabs.com"
+      );
+      return JSON.stringify({ success: true, received: payload });
+    };
+      </script>
 </body>
 </html>
